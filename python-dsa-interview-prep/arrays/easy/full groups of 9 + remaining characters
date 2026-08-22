@@ -1,0 +1,171 @@
+# LeetCode 3163 - String Compression III
+# Difficulty: Medium
+
+
+# ============================================================
+# TOP 3 SOLUTIONS
+# ============================================================
+
+
+# Approach 1: Nested While + Quotient / Remainder
+# Your Approach
+# Recommended Group-Counting Approach
+# Time Complexity: O(n)
+# Space Complexity: O(n) for output
+def compressed_string_group_count(word):
+    read = 0
+    result = []
+
+    while read < len(word):
+
+        current_char = word[read]
+        count = 0
+
+        # Count complete consecutive group
+        while read < len(word) and word[read] == current_char:
+            count += 1
+            read += 1
+
+        quotient = count // 9
+        remainder = count % 9
+
+        # Add all full groups of 9
+        for _ in range(quotient):
+            result.append(f"9{current_char}")
+
+        # Add remaining group
+        if remainder > 0:
+            result.append(f"{remainder}{current_char}")
+
+    return "".join(result)
+
+
+# ============================================================
+
+
+# Approach 2: Single Pass + Running Count
+# Flush when:
+# 1. character changes
+# 2. count reaches 9
+# Recommended / Very Clean Approach
+# Time Complexity: O(n)
+# Space Complexity: O(n) for output
+def compressed_string_running_count(word):
+    result = []
+
+    current_char = word[0]
+    count = 0
+
+    for char in word:
+
+        # Close current chunk if character changes
+        # or current chunk already has 9 chars
+        if char != current_char or count == 9:
+            result.append(f"{count}{current_char}")
+
+            current_char = char
+            count = 0
+
+        count += 1
+
+    # Final chunk
+    result.append(f"{count}{current_char}")
+
+    return "".join(result)
+
+
+# ============================================================
+
+
+# Approach 3: Read Pointer + Maximum Chunk of 9
+# Instead of counting the whole group first,
+# directly process chunks of maximum size 9.
+# Time Complexity: O(n)
+# Space Complexity: O(n) for output
+def compressed_string_chunk_pointer(word):
+    read = 0
+    result = []
+
+    while read < len(word):
+
+        start = read
+        current_char = word[read]
+
+        # Read at most 9 same characters
+        while (
+            read < len(word)
+            and word[read] == current_char
+            and read - start < 9
+        ):
+            read += 1
+
+        count = read - start
+
+        result.append(f"{count}{current_char}")
+
+    return "".join(result)
+
+
+# ============================================================
+# REMAINING SOLUTIONS
+# ============================================================
+
+
+# Approach 4: itertools.groupby + Chunk Splitting
+# Pythonic Approach
+# Time Complexity: O(n)
+# Space Complexity: O(n) for output
+def compressed_string_groupby(word):
+    from itertools import groupby
+
+    result = []
+
+    for char, group in groupby(word):
+
+        count = sum(1 for _ in group)
+
+        while count > 9:
+            result.append(f"9{char}")
+            count -= 9
+
+        if count > 0:
+            result.append(f"{count}{char}")
+
+    return "".join(result)
+
+
+# ============================================================
+
+
+# Approach 5: Your Exact Version
+# Correct Logic
+# Repeated string concatenation may be less efficient in Python.
+def compressed_string_your_version(word):
+    read = 0
+    comp = ""
+
+    while read < len(word):
+
+        current_char = word[read]
+        count = 0
+
+        while read < len(word) and word[read] == current_char:
+            count += 1
+            read += 1
+
+        if count >= 9:
+            quo = count // 9
+            remain = count % 9
+
+            if remain == 0:
+                comp += f"9{current_char}" * quo
+            else:
+                comp += (
+                    f"9{current_char}" * quo
+                    + f"{remain}{current_char}"
+                )
+
+        else:
+            comp += f"{count}{current_char}"
+
+    return comp
